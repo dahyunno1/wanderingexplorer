@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wandering Explorer</title>
+</head>
+
+<style>
+    * {
+      user-select: none;
+    }
+    
+    body {
+        background-color: rgb(6, 6, 22);
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        color: white;
+        font-weight: 400;
+        line-height: 1.6em;
+        letter-spacing: 0.1em;
+        position: relative;
+    }
+
+    #container {
+        display: flex;
+        align-items: stretch;
+        height: 100vh;
+    }
+
+    #container > img {
+        width: 50px;
+    }
+
+    .sidebar {
+        flex: 0 0 auto;
+        height: 100%;
+    }
+
+    .sidebar img {
+        height: 100%;
+        width: auto;
+        display: block;
+    }
+
+    #main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    #title {
+        width: 50vw;
+        text-align: center;
+        margin-top: 30vh;
+    }
+
+    #question {
+      text-align: center;
+      margin: 10px;
+    }
+
+    #user-ques {
+      height: 42px;
+      width: 700px;
+      border-radius: 30px;
+      padding: 10px 40px;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.703);
+      background-color: rgba(255, 192, 203, 0);
+      font-size: 18px;
+      color: rgb(255, 255, 255);
+    }
+
+    #ask {
+      height: 30px;
+      padding: 0 10px;
+      color: rgb(6, 6, 22);
+      background-color: white;
+      border-radius: 0px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 20px;
+    }
+
+    #ask:hover {
+        box-shadow: 0 0 0px rgba(255, 255, 255, 0.703);
+    }
+
+    /* Typing animation for under text */
+    #under {
+        font-size: 14px;
+        margin-top: 30px;
+        width: 800px;
+    }
+
+    #under2 {
+        font-size: 12px;
+        margin-top: 20px;
+    }
+
+    /* Floating letters animation */
+    .floating-letters {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .floating-letter {
+        position: absolute;
+        font-size: 24px;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.25);
+        animation: float 8s ease-in-out infinite;
+        letter-spacing: 2px;
+    }
+
+    .floating-letter:nth-child(1) { 
+        left: 10%; 
+        animation-delay: 0s; 
+        animation-duration: 12s;
+    }
+    .floating-letter:nth-child(2) { 
+        left: 15%; 
+        animation-delay: 1s; 
+        animation-duration: 10s;
+    }
+    .floating-letter:nth-child(3) { 
+        left: 85%; 
+        animation-delay: 2s; 
+        animation-duration: 14s;
+    }
+    .floating-letter:nth-child(4) { 
+        left: 75%; 
+        animation-delay: 3s; 
+        animation-duration: 11s;
+    }
+    .floating-letter:nth-child(5) { 
+        left: 25%; 
+        animation-delay: 4s; 
+        animation-duration: 13s;
+    }
+    .floating-letter:nth-child(6) { 
+        left: 90%; 
+        animation-delay: 5s; 
+        animation-duration: 9s;
+    }
+    .floating-letter:nth-child(7) { 
+        left: 5%; 
+        animation-delay: 6s; 
+        animation-duration: 15s;
+    }
+    .floating-letter:nth-child(8) { 
+        left: 65%; 
+        animation-delay: 7s; 
+        animation-duration: 12s;
+    }
+    .floating-letter:nth-child(9) { 
+        left: 45%; 
+        animation-delay: 8s; 
+        animation-duration: 10s;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.6;
+        }
+        20% {
+            opacity: 1;
+        }
+        80% {
+            opacity: 0.8;
+        }
+        90% {
+            opacity: 0.3;
+        }
+        100% {
+            transform: translateY(-100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* Twinkling effect */
+    .floating-letter::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: twinkle 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes twinkle {
+        0% {
+            opacity: 0.3;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+    }
+
+    /* Enhance main content z-index */
+    #main {
+        position: relative;
+        z-index: 10;
+    }
+
+</style>
+
+    <script>
+    window.addEventListener('DOMContentLoaded', function() {
+        const underElement = document.getElementById('under');
+        const originalText = '수천만개 이상의 정보와 이미지를 쉼 없이 생성하고 있는 AI를 정보 탐색에 본격적으로 활용하게 되면서, \n우리는 이 무한한 흐름 속에 잠식되어 허우적대고 있지는 않은가?';
+        
+        function typeText() {
+            underElement.innerHTML = '';
+            let currentIndex = 0;
+            
+            function addNextChar() {
+                if (currentIndex < originalText.length) {
+                    const char = originalText.charAt(currentIndex);
+                    if (char === '\n') {
+                        underElement.innerHTML += '<br>';
+                    } else {
+                        underElement.innerHTML += char;
+                    }
+                    currentIndex++;
+                    setTimeout(addNextChar, 80); // 80ms 간격으로 글자 추가
+                } else {
+                    // 텍스트가 완성되면 5초 후 다시 시작
+                    setTimeout(typeText, 5000);
+                }
+            }
+            
+            addNextChar();
+        }
+        
+        // 페이지 로드 후 2초 뒤에 타이핑 시작
+        setTimeout(typeText, 1000);
+    });
+    </script>
+
+    
+<body>
+    <!-- Floating letters background -->
+    <div class="floating-letters">
+        <div class="floating-letter">W</div>
+        <div class="floating-letter">A</div>
+        <div class="floating-letter">N</div>
+        <div class="floating-letter">D</div>
+        <div class="floating-letter">E</div>
+        <div class="floating-letter">R</div>
+        <div class="floating-letter">I</div>
+        <div class="floating-letter">N</div>
+        <div class="floating-letter">G</div>
+    </div>
+
+    <div id="container">
+        <div class="sidebar"><img src="sidebar.svg" alt="Sidebar Left"></div>
+        <div id="main">
+            <div id="title">
+                <img src="WEtitle.png" style="width: 100%;">
+                <div id="question">
+                    <select id="user-ques">
+                      <option value="" disabled selected>찾고 싶은 정보를 선택하세요..</option>
+                      <option>Go, start.</option>
+                    </select><br>
+                    <a href="index2.html">
+                    <button id="ask">search</button>
+                    </a>
+                    <div id="under"></div>
+                  </div>
+                  <div id="under2">Thanks to<br>chatGPT</div>
+              </div>
+            </div>
+            <div class="sidebar"><img src="sidebar.svg" alt="Sidebar Right"></div>
+        </div>
+    </div>
+</body>
+</html>

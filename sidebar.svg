@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_레이어_2" data-name="레이어 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167.33 1080">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #1e1e42;
+      }
+
+      .cls-2 {
+        fill: #010128;
+      }
+
+      .cls-3 {
+        fill: #3a3a56;
+      }
+    </style>
+  </defs>
+  <g id="_레이어_1-2" data-name="레이어 1">
+    <g>
+      <rect class="cls-2" x="27.89" y="595.82" width="27.89" height="484.18"/>
+      <rect class="cls-2" x="111.55" y="403.23" width="27.89" height="484.18"/>
+      <rect class="cls-2" x="27.89" width="27.89" height="484.18"/>
+      <rect class="cls-2" x="83.66" y="595.82" width="27.89" height="286.38"/>
+      <rect class="cls-1" x="55.78" y="595.82" width="27.89" height="484.18"/>
+      <rect class="cls-2" x="83.66" y="116.85" width="27.89" height="286.38"/>
+      <rect class="cls-3" x="83.66" y="403.23" width="27.89" height="192.59"/>
+      <rect class="cls-3" x="83.66" y="882.2" width="27.89" height="197.8"/>
+      <rect class="cls-3" x="139.44" y="595.82" width="27.89" height="286.38"/>
+      <rect class="cls-3" x="83.66" width="27.89" height="125.07"/>
+      <rect x="111.55" y="882.2" width="27.89" height="197.8"/>
+      <rect x="139.44" width="27.89" height="403.23"/>
+      <rect x="27.89" y="484.18" width="27.89" height="114.24"/>
+      <rect y="595.82" width="27.89" height="484.18"/>
+      <rect width="27.89" height="111.64"/>
+      <rect class="cls-1" y="111.64" width="27.89" height="484.18"/>
+      <rect class="cls-1" x="111.55" width="27.89" height="403.23"/>
+      <rect class="cls-1" x="139.44" y="403.23" width="27.89" height="192.59"/>
+      <rect class="cls-1" x="139.44" y="873.97" width="27.89" height="206.03"/>
+      <rect class="cls-1" x="55.78" width="27.89" height="595.82"/>
+    </g>
+  </g>
+</svg>

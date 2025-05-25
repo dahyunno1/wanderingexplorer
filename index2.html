@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I want to search about...</title>
+  <style>
+
+* {
+  user-select: none;
+}
+
+    body {
+      background-color: rgb(10, 8, 20);
+      color: white;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      
+    }
+
+    #page-wrapper {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-img {
+  height: 100vh;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.sidebar-img.left {
+  /* 왼쪽 여백 없이 붙게 */
+  margin-left: 0;
+}
+
+.sidebar-img.right {
+  /* 오른쪽 여백 없이 붙게 */
+  margin-right: 0;
+}
+
+#main-content {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column; /* 기존 배경 유지 */
+  overflow: hidden;
+}
+
+    #top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10vh;
+    }
+
+    #bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 300;
+
+    }
+
+    #question {
+      text-align: center;
+      margin: 10px;
+      
+    }
+
+    #user-ques {
+      height: 42px;
+      width: 700px;
+      border-radius: 30px;
+      padding: 10px 40px;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.703);
+      background-color: rgba(255, 192, 203, 0);
+      font-size: 18px;
+
+      color: rgb(255, 255, 255);
+    }
+
+    #ask {
+      height: 30px;
+      padding: 0 10px;
+      color: rgb(6, 6, 22);
+      background-color: white;
+      border-radius: 0px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px;
+
+    }
+
+    #ask:hover {
+      box-shadow: 0 0 0px rgba(255, 255, 255, 0.703);
+    }
+
+    #container {
+      flex: 1;
+      margin-top: 60px;
+      margin-bottom: 60px;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    #container > div {
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      font-size: 24px;
+    }
+
+    #noneAI {
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      width: 100%;
+      height: 100%;
+    }
+
+    #noneAI:active {
+      cursor: grabbing;
+    }
+
+    #content-wrapper {
+      transform-origin: 0 0;
+      transition: transform 0.1s ease;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .floating-item {
+      position: absolute;
+      color: white;
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      cursor: grab;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.649);
+    }
+
+    .floating-item:hover {
+      opacity: 0.8 !important;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .floating-item:active {
+      cursor: grabbing;
+    }
+
+    .floating-item.dragging {
+      cursor: grabbing !important;
+    }
+
+    .float-in {
+      opacity: 1;
+    }
+
+    .floating-img {
+      width: 120px;
+      height: auto;
+      position: absolute;
+      transition: all 0.3s ease;
+      opacity: 0;
+      cursor: grab;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .floating-img:hover {
+      opacity: 0.8 !important;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .floating-img:active {
+      cursor: grabbing;
+    }
+
+    .floating-img.dragging {
+      cursor: grabbing !important;
+    }
+
+    .float-in-img {
+      opacity: 1;
+    }
+
+    .context-menu {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 5px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+    .context-menu-item {
+      padding: 8px 15px;
+      cursor: pointer;
+      color: black;
+      font-size: 14px;
+    }
+
+    .context-menu-item:hover {
+      background-color: #f0f0f0;
+    }
+
+    .selected {
+      width: 16px !important;
+      height: 16px !important;
+      background: radial-gradient(circle, white 60%, rgba(255, 255, 255, 0.3) 100%) !important;
+      border-radius: 50% !important;
+      border: none !important;
+      font-size: 0 !important;
+      z-index: 10;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.6) !important;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .selecting {
+      transform: scale(0.8);
+      opacity: 0.7;
+    }
+
+    canvas#line-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .dimmed {
+  opacity: 0.2 !important;
+  transition: opacity 0.3s ease;
+}
+
+  #tip-con {
+    display: flex;
+    text-align: left;
+    line-height: 1.6em;
+    justify-content: space-between;
+    margin-top: 30px;
+  }
+  </style>
+</head>
+<body>
+  <div id="page-wrapper">
+    <img src="sidebar.svg" class="sidebar-img left">
+    <div id="main-content">
+  <div id="top-bar">
+    <div id="question">
+      <select id="user-ques">
+        <option value="" disabled selected>찾고 싶은 정보를 선택하세요..</option>
+        <option value="test">중간고사 하루 전날, 벼락치기 성공하는 방법</option>
+        <option value="kimchi">진짜 맛있는 돼지고기 김치찌개 레시피</option>
+        <option value="pen">옷에 볼펜 자국 지우는 법</option>
+      </select>
+      <button id="ask">search</button><br>
+      <div id="tip-con">
+      <div>웹 공간을 떠돌면서 유의미한 정보를 수집하세요.<br>
+        숨겨져 있는 정보를 찾기 위해 집어 던지고 들추어내도 상관 없습니다.</div>
+        <div>드래그 : 조각들 뒤지기<br>
+          더블클릭 : 조각 수집<br>
+          스크롤 : 화면 줌 인/줌아웃<br>
+          우클릭 - 제거</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="container">
+    <div id="noneAI">
+      <div id="content-wrapper">
+        <canvas id="line-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+    <div id="bottom-bar">
+      <label style="margin-left: 20px; display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="dim-toggle" />
+        <span style="font-size: 14px;">🔍</span>
+        <a href="index.html" style="color: white;">Back</a>
+      </label>
+    </div>
+  </div>
+  <img src="sidebar.svg" class="sidebar-img right">
+</div>
+  <script>
+
+    const select = document.getElementById("user-ques");
+    const btn = document.getElementById("ask");
+    const container = document.getElementById("noneAI");
+    const contentWrapper = document.getElementById("content-wrapper");
+  
+    const canvas = document.getElementById("line-canvas");
+    const ctx = canvas.getContext("2d");
+    let selectedItems = [];
+    let draggingItem = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let contextMenu = null;
+
+    // 줌 관련 변수
+    let scale = 1;
+    let panX = 0;
+    let panY = 0;
+  
+    function resizeCanvas() {
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // 줌 기능 추가
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const oldScale = scale;
+      const zoomSpeed = 0.1;
+      
+      if (e.deltaY < 0) {
+        scale = Math.min(scale + zoomSpeed, 3); // 최대 3배 줌인
+      } else {
+        scale = Math.max(scale - zoomSpeed, 0.3); // 최소 0.3배 줌아웃
+      }
+      
+      // 마우스 위치를 중심으로 줌
+      const scaleChange = scale / oldScale;
+      panX = mouseX - (mouseX - panX) * scaleChange;
+      panY = mouseY - (mouseY - panY) * scaleChange;
+      
+      contentWrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      
+      drawConnections();
+    });
+
+    // 드래그로 패닝 기능
+    container.addEventListener('mousedown', (e) => {
+      if (e.target === container || e.target === contentWrapper) {
+        e.preventDefault();
+      }
+      hideContextMenu();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (draggingItem) {
+        const rect = container.getBoundingClientRect();
+        const adjustedX = (e.clientX - rect.left - panX) / scale;
+        const adjustedY = (e.clientY - rect.top - panY) / scale;
+        
+        draggingItem.style.left = `${adjustedX - offsetX}px`;
+        draggingItem.style.top = `${adjustedY - offsetY}px`;
+        drawConnections();
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (draggingItem) {
+        draggingItem.classList.remove('dragging');
+        draggingItem.style.zIndex = '';
+      }
+      draggingItem = null;
+    });
+
+    // 우클릭 컨텍스트 메뉴 숨기기
+    document.addEventListener('contextmenu', (e) => {
+      if (!e.target.closest('.context-menu')) {
+        e.preventDefault();
+        hideContextMenu();
+      }
+    });
+
+    function hideContextMenu() {
+      if (contextMenu) {
+        contextMenu.remove();
+        contextMenu = null;
+      }
+    }
+
+    function showContextMenu(e, element) {
+      hideContextMenu();
+      
+      contextMenu = document.createElement('div');
+      contextMenu.className = 'context-menu';
+      contextMenu.innerHTML = '<div class="context-menu-item">제거</div>';
+      
+      contextMenu.style.left = e.pageX + 'px';
+      contextMenu.style.top = e.pageY + 'px';
+      
+      document.body.appendChild(contextMenu);
+      
+      contextMenu.querySelector('.context-menu-item').addEventListener('click', () => {
+        element.remove();
+        hideContextMenu();
+      });
+    }
+  
+    const AIanswers = {
+      test: `결과로 보여지는 이미지와 텍스트 조각들은 해당 질문에 대한 chatGPT의 답변들을 기반으로 생성되었습니다.
+필요한 조각들을 직접 선택하고 조합하는 과정을 통해 당신은 새로운 의미체계를 만들어낼 수 있으며, 이는 웹 안에서
+고유한 형상으로  나타납니다.`,
+      kimchi: `결과로 보여지는 이미지와 텍스트 조각들은 해당 질문에 대한 chatGPT의 답변들을 기반으로 생성되었습니다.
+필요한 조각들을 직접 선택하고 조합하는 과정을 통해 당신은 새로운 의미체계를 만들어낼 수 있으며, 이는 웹 안에서
+고유한 형상으로  나타납니다.`,
+      pen: `결과로 보여지는 이미지와 텍스트 조각들은 해당 질문에 대한 chatGPT의 답변들을 기반으로 생성되었습니다.
+필요한 조각들을 직접 선택하고 조합하는 과정을 통해 당신은 새로운 의미체계를 만들어낼 수 있으며, 이는 웹 안에서
+고유한 형상으로  나타납니다.`
+    };
+  
+    let i = 0;
+    function typeText(text) {
+      const paragraph = document.createElement("p");
+      contentWrapper.appendChild(paragraph);
+      paragraph.style.margin = "55px auto";
+      paragraph.style.fontSize = "15px";
+      paragraph.style.width = "880px"
+      paragraph.style.textAlign = "center";
+      paragraph.style.position = "absolute";
+      paragraph.style.top = "90%";
+      paragraph.style.left = "50%";
+      paragraph.style.transform = "translateX(-50%)";
+  
+      function type() {
+        if (i < text.length) {
+          paragraph.textContent += text[i];
+          i++;
+          setTimeout(type, 40);
+        }
+      }
+      type();
+    }
+  
+    btn.addEventListener("click", () => {
+      const key = select.value;
+      const text = AIanswers[key];
+      i = 0;
+      contentWrapper.innerHTML = '';
+      contentWrapper.appendChild(canvas);
+      // 줌 리셋
+      scale = 1;
+      panX = 0;
+      panY = 0;
+      contentWrapper.style.transform = 'translate(0px, 0px) scale(1)';
+      selectedItems = [];
+      hideContextMenu();
+      // 캔버스 클리어
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      typeText(text);
+      scatterInNoneAI();
+    });
+  
+    function makeDraggableAndSelectable(el) {
+      if (el.tagName === "IMG") {
+        el.addEventListener("dragstart", (e) => e.preventDefault());
+      }
+  
+      el.addEventListener("mousedown", (e) => {
+        if (e.button === 0) { // 좌클릭만
+          e.stopPropagation();
+          draggingItem = el;
+          el.classList.add('dragging');
+          offsetX = e.offsetX;
+          offsetY = e.offsetY;
+          el.style.zIndex = 100;
+        }
+      });
+  
+      el.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        
+        // 선택 애니메이션 시작
+        el.classList.add('selecting');
+        
+        setTimeout(() => {
+          el.classList.remove('selecting');
+          el.classList.toggle("selected");
+          
+          if (el.classList.contains("selected")) {
+            selectedItems.push(el);
+            el.style.cursor = 'pointer';
+          } else {
+            selectedItems = selectedItems.filter(item => item !== el);
+            // 선택 해제시 커서를 다시 grab으로
+            setTimeout(() => {
+              el.style.cursor = 'grab';
+            }, 200);
+          }
+          drawConnectionsAnimated();
+        }, 250);
+      });
+
+      // 우클릭 컨텍스트 메뉴 (선택되지 않은 요소만)
+      el.addEventListener("contextmenu", (e) => {
+        if (!el.classList.contains("selected")) {
+          e.preventDefault();
+          e.stopPropagation();
+          showContextMenu(e, el);
+        }
+      });
+    }
+  
+    function drawConnections() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (selectedItems.length >= 2) {
+        for (let i = 0; i < selectedItems.length - 1; i++) {
+          const item1 = selectedItems[i];
+          const item2 = selectedItems[i + 1];
+          
+          // 각 요소의 실제 위치 계산 (transform 고려)
+          const x1 = parseFloat(item1.style.left) + 8; // 원의 중심점으로 조정
+          const y1 = parseFloat(item1.style.top) + 8;
+          const x2 = parseFloat(item2.style.left) + 8;
+          const y2 = parseFloat(item2.style.top) + 8;
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+    }
+
+    function drawConnectionsAnimated() {
+      let progress = 0;
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (selectedItems.length >= 2) {
+          for (let i = 0; i < selectedItems.length - 1; i++) {
+            const item1 = selectedItems[i];
+            const item2 = selectedItems[i + 1];
+            
+            const x1 = parseFloat(item1.style.left) + 8;
+            const y1 = parseFloat(item1.style.top) + 8;
+            const x2 = parseFloat(item2.style.left) + 8;
+            const y2 = parseFloat(item2.style.top) + 8;
+
+            // 애니메이션 진행도에 따라 선 그리기
+            const currentX = x1 + (x2 - x1) * progress;
+            const currentY = y1 + (y2 - y1) * progress;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(currentX, currentY);
+            ctx.strokeStyle = 'rgba(255, 100, 100, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        }
+        
+        progress += 0.05;
+        if (progress <= 1) {
+          requestAnimationFrame(animate);
+        } else {
+          drawConnections(); // 최종 완성된 선 그리기
+        }
+      };
+      animate();
+    }
+
+    function getRandomPosition() {
+      const x = Math.random() * (container.clientWidth - 250);
+      const y = Math.random() * (container.clientHeight - 150);
+      return {x, y};
+    }
+  
+    function scatterInNoneAI() {
+      let texts = [];
+      let images = [];
+  
+      if (select.value === "test") {
+        texts = [
+          "개념 위주로 훑기", "기출문제 반복 풀이", "노트 정리 다시 보기", "쉬운 것부터 공략",
+          "족보 위주로 공부", "암기보단 이해 우선", "책 덮고 문제 풀기", "최소한의 효율 공부",
+          "유튜브 강의 몰아보기", "잘 나오는 챕터 집중", "친구한테 SOS", "포기하기", "자퇴하기", "미리미리 할 걸..", "다음 학기에 재수강하기"
+        ];
+        images = [
+          'test1.jpg', 'test2.avif', 'test3.png', 'test4.jpg', 'test5.jpg', 'test6.jpg', 'test7.jpeg', 'test8.jpg', 'test9.png', 'test10.jpg', 'test11.JPG', 'test12.jpg', 'test13.jpg', 'test14.jpg', 'test15.png', 'test16.webp', 'test17.jpg', 'test18.webp', 'test19.jpg', 'test20.jpeg'
+        ];
+      } else if (select.value === "kimchi") {
+        texts = [
+         "묵은지 쓰면 깊은맛", "앞다리살이 국물 잘 우러남", "김치는 볶고 끓여야", "참치액 몇 방울 추가", "돼지고기 핏물 제거 필수", "양파는 반개만 넣기", "대파는 두 번 넣기", "물 대신 쌀뜨물 쓰기", "고춧가루는 나중에", "된장 반 티스푼 비밀 재료", "멸치 육수면 감칠맛 업", "식용유 대신 들기름 가능", "다진 마늘 듬뿍 넣기", "두부는 끓이기 직전에", "후추는 아주 살짝만", "고기 먼저 볶아 풍미 더함", "청양고추는 마지막에", "전날보다 다음날이 맛남", "밥 말기 전에 숨 쉬기", "뚝배기 있으면 무조건 사용", "김치 국물 너무 많이 넣지 말기", "차돌박이 넣으면 김치국됨", "설탕 한 꼬집이 포인트", "김치 심지도 같이 넣기", "토마토 넣으면 이상해짐", "소주 한 숟갈 잡내 제거", "전자레인지에 고기 돌리기 금지", "핫도그 먹으면서 끓이기", "라면 스프는 비추", "남은 김치찌개에 라면 넣기 가능", "혼자 먹을 땐 소리 내지 않기", "뚜껑은 약불 땐 열어두기", "애플민트는 넣지 말기", "김치찌개엔 사이다 NO", "깻잎은 취향존중", "국자 안 쓰고 후회하지 말기", "타코야키랑 같이 먹지 말기", "깊은 그릇보다 넓은 냄비", "찬밥 말아야 진짜임", "시작 전에 배고프면 실패", "동치미랑 같이 먹으면 상극", "김치가 너무 맛없으면 포기", "김치찌개엔 감자 넣지 말기", "냄비 태우면 울지 말기", "레시피는 지켜야 레시피", "계량 안 하면 맛 운에 맡김", "다 끓인 후 5분 쉬게 하기", "TV 보면서 끓이면 넘침", "에어팟 낀 채로 만들지 말기", "끓는 동안 춤추지 않기", "불 앞에서 생각에 잠기지 말기", "찌개에 초코바 빠뜨리지 말기", "식탁에 먼저 숟가락 두기", "남기면 김치가 슬퍼함", "애정 넣으면 더 맛남", "엄마한테 물어보면 더 쉬움", "레시피 검색은 최소 3개 보기", "너무 자신감 있으면 태움", "요리하면서 울지 않기", "김치찌개에 정체성 혼동 금지", "먹을 사람 없으면 혼자 다 먹기", "밥보다 찌개 먼저 퍼오기", "맛없으면 라면 끓이기", "첫 숟가락은 혼잣말 금지", "된장찌개랑 비교하지 말기", "고기 많으면 짜짐 주의", "최고의 반찬은 김치찌개다"
+        ];
+        images = [
+          'kim1.webp', 'kim2.jpg', 'kim3.jpg', 'kim4.jpg', 'kim5.jpg', 'kim6.avif', 'kim7.jpg', 'kim8.jpg', 'kim9.jpg', 'kim10.jpg', 'kim11.webp', 'kim12.jpg', 'kim13.jpg', 'kim14.jpg', 'kim15.jpg', 'kim16.jpg', 'kim17.jpg', 'kim18.jpg', 'kim19.jpg', 'kim20.jpg', 'kim21.jpg'
+        ];
+      }
+        else if (select.value === "pen") {
+        texts = [
+         "알코올로 톡톡 두드리기", "물파스로 살살 문지르기", "치약 바르고 칫솔질", "물티슈로 세게 문지르기", "에탄올 스며들게 하기", "식초랑 베이킹소다", "레몬즙으로 얼룩 제거", "젖은 솜으로 눌러보기", "과산화수소로 톡톡", "세탁 전 얼룩 제거제", "마요네즈는 절대 금지", "모기약 뿌리면 이상함", "드라이클리닝 맡기기", "섬유유연제는 무의미", "손톱으로 긁다 실패함", "헤어스프레이 뿌리기", "솜에 알코올 적시기", "식기세척기 돌리지 마", "지우개로 문질러 보기", "옷 뒤집고 문질러보기", "베이킹파우더 뿌려보기", "선크림은 효과 없어", "분무기로 물 뿌리기", "문지르기 전에 불려", "휴지로 닦다 번짐", "헤어젤은 글쎄요", "치약에 물 섞어 쓰기", "소금은 안 먹힘", "수건으로 톡톡 두드림", "드라이어로 말려보기", "가위로 잘라버리기", "흰옷엔 레몬즙 효과", "컬러옷은 신중하게", "문지르다 더 번짐", "수성펜인지 확인", "볼펜 잉크 성분 검색", "세제에 오래 담그기", "걍 새 옷 사기", "엄마한테 들키지 않기", "손빨래 추천", "뜨거운 물은 금물", "아세톤은 색 빠짐", "알콜솜 없으면 손소독제", "이쑤시개로 긁지 마", "세탁 전 스팟처리", "오래되면 안 빠짐", "강하게 비비면 망함", "인터넷 후기 참고", "지워졌는지 조심히 확인"
+        ];
+        images = [
+          'pen1.jpg', 'pen2.webp', 'pen3.jpg', 'pen4.jpeg', 'pen5.jpg', 'pen6.avif', 'pen6.jpg', 'pen7.jpg', 'pen8.jpg', 'pen9.jpg', 'pen10.jpg', 'pen11.jpg', 'pen12.jpeg', 'pen13.webp', 'pen14.png', 'pen15.jpg', 'pen16.png', 'pen17.jpg', 'pen18.jpg', 'pen19.jpg', 'pen20.jpg'
+         ];
+        }
+  
+      // 리스트 복사 및 셔플
+      const availableTexts = [...texts];
+      const availableImages = [...images];
+      
+      // 배열 셔플 함수
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+      
+      shuffle(availableTexts);
+      shuffle(availableImages);
+      
+      const totalItems = 100;
+      let textIndex = 0;
+      let imageIndex = 0;
+  
+      for (let i = 0; i < totalItems; i++) {
+        setTimeout(() => {
+          const isImage = Math.random() < 0.5 && imageIndex < availableImages.length;
+  
+          if (isImage) {
+            const img = document.createElement("img");
+            const randomImgIndex = Math.floor(Math.random() * availableImages.length);
+            img.src = availableImages[randomImgIndex];
+            imageIndex++;
+            img.className = "floating-img";
+            const pos = getRandomPosition();
+            img.style.left = `${pos.x}px`;
+            img.style.top = `${pos.y}px`;
+            img.style.position = 'absolute';
+
+            const imgSize = Math.floor(Math.random() * 250) + 30; // 50px ~ 150px
+            img.style.width = `${imgSize}px`;
+            img.style.height = 'auto';
+  
+            makeDraggableAndSelectable(img);
+            contentWrapper.appendChild(img);
+            setTimeout(() => img.classList.add("float-in-img"), 10);
+  
+          } else if (availableTexts.length > 0) {
+      const box = document.createElement("div");
+      box.className = "floating-item";
+      const randomTextIndex = Math.floor(Math.random() * availableTexts.length);
+      box.textContent = availableTexts[randomTextIndex];
+      const pos = getRandomPosition();
+      box.style.left = `${pos.x}px`;
+      box.style.top = `${pos.y}px`;
+      box.style.position = 'absolute';
+
+      const fontSize = Math.floor(Math.random() * 48) + 8; // 12px ~ 28px
+      box.style.fontSize = `${fontSize}px`;
+      box.style.padding = `${fontSize / 2}px ${fontSize}px`; 
+
+      makeDraggableAndSelectable(box);
+      contentWrapper.appendChild(box);
+      setTimeout(() => box.classList.add("float-in"), 40);
+    }
+  }, i * 200 + Math.random() * 100);
+}
+    }
+    canvas.style.zIndex = 1000;
+    canvas.style.pointerEvents = "none";
+
+    const dimToggle = document.getElementById('dim-toggle');
+
+dimToggle.addEventListener('change', () => {
+  const allFloatingItems = document.querySelectorAll('.floating-item, .floating-img');
+  const selectedDots = document.querySelectorAll('.selected');
+
+  allFloatingItems.forEach(item => {
+    const isSelected = item.classList.contains('selected');
+    const isDoubleClicked = item.dataset.doubleClicked === "true";
+    
+    // 조건: 선택된 점(.selected) 또는 더블클릭된 항목은 흐림 제외
+    if (!isSelected && !isDoubleClicked) {
+      if (dimToggle.checked) {
+        item.classList.add('dimmed');
+      } else {
+        item.classList.remove('dimmed');
+      }
+    }
+  });
+});
+
+  </script>
+  
+</body>
+</html>
