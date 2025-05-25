@@ -91,8 +91,11 @@
     #under {
         font-size: 14px;
         margin-top: 30px;
-        width: 800px;
-        margin-left: 200px;
+        text-align: center;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0 20px;
     }
 
     #under2 {
@@ -219,6 +222,30 @@
     #main {
         position: relative;
         z-index: 10;
+    }
+
+    /* 반응형 디자인 추가 */
+    @media (max-width: 1024px) {
+        #under {
+            max-width: 90%;
+            font-size: 13px;
+        }
+        
+        #user-ques {
+            width: 90%;
+            max-width: 600px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        #under {
+            font-size: 12px;
+            padding: 0 15px;
+        }
+        
+        #title {
+            width: 80vw;
+        }
     }
 
 </style>
