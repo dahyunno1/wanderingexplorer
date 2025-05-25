@@ -309,8 +309,8 @@
     <div id="bottom-bar">
       <label style="margin-left: 20px; display: flex; align-items: center; gap: 8px;">
         <input type="checkbox" id="dim-toggle" />
-        <span style="font-size: 14px;">🔍</span>
-        <a href="index.html" style="color: white;">Back</a>
+        <span style="font-size: 20px;">🔍</span>
+        <a href="index.html" style="color: white; font-size: 20px;">Back</a>
       </label>
     </div>
   </div>
@@ -486,115 +486,149 @@
     });
   
     function makeDraggableAndSelectable(el) {
-      if (el.tagName === "IMG") {
-        el.addEventListener("dragstart", (e) => e.preventDefault());
-      }
-  
-      el.addEventListener("mousedown", (e) => {
-        if (e.button === 0) { // 좌클릭만
-          e.stopPropagation();
-          draggingItem = el;
-          el.classList.add('dragging');
-          offsetX = e.offsetX;
-          offsetY = e.offsetY;
-          el.style.zIndex = 100;
+  if (el.tagName === "IMG") {
+    el.addEventListener("dragstart", (e) => e.preventDefault());
+  }
+
+  el.addEventListener("mousedown", (e) => {
+    if (e.button === 0) { // 좌클릭만
+      e.stopPropagation();
+      draggingItem = el;
+      el.classList.add('dragging');
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+      el.style.zIndex = 100;
+    }
+  });
+
+  el.addEventListener("dblclick", (e) => {
+    e.stopPropagation();
+    
+    // 선택 애니메이션 시작
+    el.classList.add('selecting');
+    
+    setTimeout(() => {
+      el.classList.remove('selecting');
+      el.classList.toggle("selected");
+      
+      if (el.classList.contains("selected")) {
+        selectedItems.push(el);
+        el.style.cursor = 'pointer';
+        
+        // 선택된 요소를 정원으로 만들기
+        const rect = el.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        el.style.borderRadius = '50%';
+        
+        // 텍스트가 있는 경우 중앙 정렬
+        if (el.tagName === 'DIV' || el.textContent) {
+          el.style.display = 'flex';
+          el.style.alignItems = 'center';
+          el.style.justifyContent = 'center';
+          el.style.textAlign = 'center';
         }
-      });
-  
-      el.addEventListener("dblclick", (e) => {
-        e.stopPropagation();
+      } else {
+        selectedItems = selectedItems.filter(item => item !== el);
         
-        // 선택 애니메이션 시작
-        el.classList.add('selecting');
+        // 원래 모양으로 복원
+        el.style.width = '';
+        el.style.height = '';
+        el.style.borderRadius = '';
+        el.style.display = '';
+        el.style.alignItems = '';
+        el.style.justifyContent = '';
+        el.style.textAlign = '';
         
+        // 선택 해제시 커서를 다시 grab으로
         setTimeout(() => {
-          el.classList.remove('selecting');
-          el.classList.toggle("selected");
-          
-          if (el.classList.contains("selected")) {
-            selectedItems.push(el);
-            el.style.cursor = 'pointer';
-          } else {
-            selectedItems = selectedItems.filter(item => item !== el);
-            // 선택 해제시 커서를 다시 grab으로
-            setTimeout(() => {
-              el.style.cursor = 'grab';
-            }, 200);
-          }
-          drawConnectionsAnimated();
-        }, 250);
-      });
+          el.style.cursor = 'grab';
+        }, 200);
+      }
+      drawConnectionsAnimated();
+    }, 250);
+  });
 
-      // 우클릭 컨텍스트 메뉴 (선택되지 않은 요소만)
-      el.addEventListener("contextmenu", (e) => {
-        if (!el.classList.contains("selected")) {
-          e.preventDefault();
-          e.stopPropagation();
-          showContextMenu(e, el);
-        }
-      });
+  // 우클릭 컨텍스트 메뉴 (선택되지 않은 요소만)
+  el.addEventListener("contextmenu", (e) => {
+    if (!el.classList.contains("selected")) {
+      e.preventDefault();
+      e.stopPropagation();
+      showContextMenu(e, el);
     }
-  
-    function drawConnections() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (selectedItems.length >= 2) {
-        for (let i = 0; i < selectedItems.length - 1; i++) {
-          const item1 = selectedItems[i];
-          const item2 = selectedItems[i + 1];
-          
-          // 각 요소의 실제 위치 계산 (transform 고려)
-          const x1 = parseFloat(item1.style.left) + 8; // 원의 중심점으로 조정
-          const y1 = parseFloat(item1.style.top) + 8;
-          const x2 = parseFloat(item2.style.left) + 8;
-          const y2 = parseFloat(item2.style.top) + 8;
+  });
+}
 
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        }
+function drawConnections() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (selectedItems.length >= 2) {
+    for (let i = 0; i < selectedItems.length - 1; i++) {
+      const item1 = selectedItems[i];
+      const item2 = selectedItems[i + 1];
+      
+      // 각 요소의 실제 중심점 계산
+      const rect1 = item1.getBoundingClientRect();
+      const rect2 = item2.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      
+      const x1 = rect1.left - canvasRect.left + rect1.width / 2;
+      const y1 = rect1.top - canvasRect.top + rect1.height / 2;
+      const x2 = rect2.left - canvasRect.left + rect2.width / 2;
+      const y2 = rect2.top - canvasRect.top + rect2.height / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+}
+
+function drawConnectionsAnimated() {
+  let progress = 0;
+  const animate = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (selectedItems.length >= 2) {
+      for (let i = 0; i < selectedItems.length - 1; i++) {
+        const item1 = selectedItems[i];
+        const item2 = selectedItems[i + 1];
+        
+        // 각 요소의 실제 중심점 계산
+        const rect1 = item1.getBoundingClientRect();
+        const rect2 = item2.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        const x1 = rect1.left - canvasRect.left + rect1.width / 2;
+        const y1 = rect1.top - canvasRect.top + rect1.height / 2;
+        const x2 = rect2.left - canvasRect.left + rect2.width / 2;
+        const y2 = rect2.top - canvasRect.top + rect2.height / 2;
+
+        // 애니메이션 진행도에 따라 선 그리기
+        const currentX = x1 + (x2 - x1) * progress;
+        const currentY = y1 + (y2 - y1) * progress;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(currentX, currentY);
+        ctx.strokeStyle = 'rgba(255, 100, 100, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
     }
-
-    function drawConnectionsAnimated() {
-      let progress = 0;
-      const animate = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        if (selectedItems.length >= 2) {
-          for (let i = 0; i < selectedItems.length - 1; i++) {
-            const item1 = selectedItems[i];
-            const item2 = selectedItems[i + 1];
-            
-            const x1 = parseFloat(item1.style.left) + 8;
-            const y1 = parseFloat(item1.style.top) + 8;
-            const x2 = parseFloat(item2.style.left) + 8;
-            const y2 = parseFloat(item2.style.top) + 8;
-
-            // 애니메이션 진행도에 따라 선 그리기
-            const currentX = x1 + (x2 - x1) * progress;
-            const currentY = y1 + (y2 - y1) * progress;
-
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(currentX, currentY);
-            ctx.strokeStyle = 'rgba(255, 100, 100, 0.7)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-          }
-        }
-        
-        progress += 0.05;
-        if (progress <= 1) {
-          requestAnimationFrame(animate);
-        } else {
-          drawConnections(); // 최종 완성된 선 그리기
-        }
-      };
-      animate();
+    
+    progress += 0.05;
+    if (progress <= 1) {
+      requestAnimationFrame(animate);
+    } else {
+      drawConnections(); // 최종 완성된 선 그리기
     }
+  };
+  animate();
+}
 
     function getRandomPosition() {
       const x = Math.random() * (container.clientWidth - 250);
@@ -613,7 +647,7 @@
           "유튜브 강의 몰아보기", "잘 나오는 챕터 집중", "친구한테 SOS", "포기하기", "자퇴하기", "미리미리 할 걸..", "다음 학기에 재수강하기"
         ];
         images = [
-          'test1.jpg', 'test2.avif', 'test3.png', 'test4.jpg', 'test5.jpg', 'test6.jpg', 'test7.jpeg', 'test8.jpg', 'test9.png', 'test10.jpg', 'test11.JPG', 'test12.jpg', 'test13.jpg', 'test14.jpg', 'test15.png', 'test16.webp', 'test17.jpg', 'test18.webp', 'test19.jpg', 'test20.jpeg'
+          'test1.jpg', 'test2.avif', 'test3.png', 'test4.jpg', 'test5.jpg', 'test7.jpeg', 'test8.jpg', 'test9.png', 'test10.jpg', 'test11.JPG', 'test12.jpg', 'test13.jpg', 'test14.jpg', 'test15.png', 'test16.webp', 'test17.jpg', 'test18.webp', 'test19.jpg', 'test20.jpeg'
         ];
       } else if (select.value === "kimchi") {
         texts = [
