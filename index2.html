@@ -324,7 +324,6 @@
     function resizeCanvas() {
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
-      drawConnections();
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
@@ -412,9 +411,7 @@
       document.body.appendChild(contextMenu);
       
       contextMenu.querySelector('.context-menu-item').addEventListener('click', () => {
-        selectedItems = selectedItems.filter(item => item !== element);
         element.remove();
-        drawConnections();
         hideContextMenu();
       });
     }
@@ -505,10 +502,18 @@
         
         // 선택된 요소를 정원으로 만들기
         const rect = el.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
+        const computedStyle = window.getComputedStyle(el);
+        const paddingX = parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
+        const paddingY = parseFloat(computedStyle.paddingTop) + parseFloat(computedStyle.paddingBottom);
         
-        el.style.width = size + 'px';
-        el.style.height = size + 'px';
+        // 콘텐츠 크기에 여유를 더해서 원의 지름 결정
+        const contentWidth = rect.width - paddingX;
+        const contentHeight = rect.height - paddingY;
+        const diameter = Math.max(contentWidth, contentHeight) + 40; // 여유 공간 추가
+        
+        // size 변수 대신 계산된 diameter 사용
+        el.style.width = diameter + 'px';
+        el.style.height = diameter + 'px';
         el.style.borderRadius = '50%';
         
         // 텍스트가 있는 경우 중앙 정렬
@@ -517,6 +522,11 @@
           el.style.alignItems = 'center';
           el.style.justifyContent = 'center';
           el.style.textAlign = 'center';
+          // 텍스트 크기도 원에 맞게 조정
+          el.style.fontSize = Math.min(diameter / 8, 16) + 'px';
+          el.style.lineHeight = '1.2';
+          el.style.wordBreak = 'keep-all';
+          el.style.overflow = 'hidden';
         }
       } else {
         selectedItems = selectedItems.filter(item => item !== el);
@@ -529,6 +539,10 @@
         el.style.alignItems = '';
         el.style.justifyContent = '';
         el.style.textAlign = '';
+        el.style.fontSize = '';
+        el.style.lineHeight = '';
+        el.style.wordBreak = '';
+        el.style.overflow = '';
         
         // 선택 해제시 커서를 다시 grab으로
         setTimeout(() => {
@@ -549,7 +563,6 @@
   });
 }
 
-javascript// 기존 코드 (문제가 있던 부분)
 function drawConnections() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (selectedItems.length >= 2) {
@@ -566,31 +579,6 @@ function drawConnections() {
       const y1 = rect1.top - canvasRect.top + rect1.height / 2;
       const x2 = rect2.left - canvasRect.left + rect2.width / 2;
       const y2 = rect2.top - canvasRect.top + rect2.height / 2;
-
-      // ... 선 그리기
-    }
-  }
-}
-
-// 새로운 코드 (수정된 부분)
-function drawConnections() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (selectedItems.length >= 2) {
-    for (let i = 0; i < selectedItems.length - 1; i++) {
-      const item1 = selectedItems[i];
-      const item2 = selectedItems[i + 1];
-      
-      // contentWrapper 기준 요소의 중심점 계산
-      const item1CenterX = parseFloat(item1.style.left) + item1.offsetWidth / 2;
-      const item1CenterY = parseFloat(item1.style.top) + item1.offsetHeight / 2;
-      const item2CenterX = parseFloat(item2.style.left) + item2.offsetWidth / 2;
-      const item2CenterY = parseFloat(item2.style.top) + item2.offsetHeight / 2;
-      
-      // 변환(줌/패닝)이 적용된 좌표를 캔버스 좌표로 변환
-      const x1 = item1CenterX * scale + panX;
-      const y1 = item1CenterY * scale + panY;
-      const x2 = item2CenterX * scale + panX;
-      const y2 = item2CenterY * scale + panY;
 
       ctx.beginPath();
       ctx.moveTo(x1, y1);
@@ -644,6 +632,7 @@ function drawConnectionsAnimated() {
   };
   animate();
 }
+
     function getRandomPosition() {
       const x = Math.random() * (container.clientWidth - 250);
       const y = Math.random() * (container.clientHeight - 150);
@@ -680,7 +669,6 @@ function drawConnectionsAnimated() {
          ];
         }
   
-      // 리스트 복사 및 셔플
       // 리스트 복사 및 셔플
       const availableTexts = [...texts];
       const availableImages = [...images];
