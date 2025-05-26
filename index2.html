@@ -30,22 +30,7 @@
   overflow: hidden;
 }
 
-.sidebar-img {
-  height: 100vh;
-  width: auto;
-  object-fit: contain;
-  flex-shrink: 0;
-}
 
-.sidebar-img.left {
-  /* 왼쪽 여백 없이 붙게 */
-  margin-left: 0;
-}
-
-.sidebar-img.right {
-  /* 오른쪽 여백 없이 붙게 */
-  margin-right: 0;
-}
 
 #main-content {
   flex: 1;
@@ -276,7 +261,6 @@
 </head>
 <body>
   <div id="page-wrapper">
-    <img src="sidebar.svg" class="sidebar-img left">
     <div id="main-content">
   <div id="top-bar">
     <div id="question">
@@ -288,12 +272,12 @@
       </select>
       <button id="ask">search</button><br>
       <div id="tip-con">
-      <div>웹 공간을 떠돌면서 유의미한 정보를 수집하세요.<br>
-        숨겨져 있는 정보를 찾기 위해 집어 던지고 들추어내도 상관 없습니다.</div>
-        <div>드래그 : 조각들 뒤지기<br>
+      <span style="background-color: rgb(10, 8, 20);">웹 공간을 떠돌면서 유의미한 정보를 수집하세요.<br>
+        숨겨져 있는 정보를 찾기 위해 집어 던지고 들추어내도 상관 없습니다.</span>
+        <span style="background-color: rgb(10, 8, 20);">드래그 : 조각들 뒤지기<br>
           더블클릭 : 조각 수집<br>
           스크롤 : 화면 줌 인/줌아웃<br>
-          우클릭 - 제거</div>
+          우클릭 - 제거</span>
       </div>
     </div>
   </div>
@@ -309,12 +293,13 @@
     <div id="bottom-bar">
       <label style="margin-left: 20px; display: flex; align-items: center; gap: 8px;">
         <input type="checkbox" id="dim-toggle" />
-        <span style="font-size: 20px;">🔍</span>
-        <a href="index.html" style="color: white; font-size: 20px;">Back</a>
+        <span style="font-size: 15px; font-weight: 400;">My information</span>
+        <a href="index.html" style="color: white; font-size: 15px; font-weight: 400;">
+          Back</a>
       </label>
     </div>
   </div>
-  <img src="sidebar.svg" class="sidebar-img right">
+
 </div>
   <script>
 
@@ -517,9 +502,18 @@
         
         // 선택된 요소를 정원으로 만들기
         const rect = el.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        el.style.width = size + 'px';
-        el.style.height = size + 'px';
+        const computedStyle = window.getComputedStyle(el);
+        const paddingX = parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
+        const paddingY = parseFloat(computedStyle.paddingTop) + parseFloat(computedStyle.paddingBottom);
+        
+        // 콘텐츠 크기에 여유를 더해서 원의 지름 결정
+        const contentWidth = rect.width - paddingX;
+        const contentHeight = rect.height - paddingY;
+        const diameter = Math.max(contentWidth, contentHeight) + 40; // 여유 공간 추가
+        
+        // size 변수 대신 계산된 diameter 사용
+        el.style.width = diameter + 'px';
+        el.style.height = diameter + 'px';
         el.style.borderRadius = '50%';
         
         // 텍스트가 있는 경우 중앙 정렬
@@ -528,6 +522,11 @@
           el.style.alignItems = 'center';
           el.style.justifyContent = 'center';
           el.style.textAlign = 'center';
+          // 텍스트 크기도 원에 맞게 조정
+          el.style.fontSize = Math.min(diameter / 8, 16) + 'px';
+          el.style.lineHeight = '1.2';
+          el.style.wordBreak = 'keep-all';
+          el.style.overflow = 'hidden';
         }
       } else {
         selectedItems = selectedItems.filter(item => item !== el);
@@ -540,6 +539,10 @@
         el.style.alignItems = '';
         el.style.justifyContent = '';
         el.style.textAlign = '';
+        el.style.fontSize = '';
+        el.style.lineHeight = '';
+        el.style.wordBreak = '';
+        el.style.overflow = '';
         
         // 선택 해제시 커서를 다시 grab으로
         setTimeout(() => {
@@ -642,19 +645,19 @@ function drawConnectionsAnimated() {
   
       if (select.value === "test") {
         texts = [
-          "개념 위주로 훑기", "기출문제 반복 풀이", "노트 정리 다시 보기", "쉬운 것부터 공략",
-          "족보 위주로 공부", "암기보단 이해 우선", "책 덮고 문제 풀기", "최소한의 효율 공부",
+          "개념 위주로 훑기", "기출문제 반복 풀이", "노트 정리 다시 보기", "쉬운 것부터 공략", "진로 바꾸기", "창업하기", "게임 한 판 하고 생각하기", "밖에 편의점 갔다오기", "명상 하기",
+          "족보 위주로 공부", "암기보단 이해 우선", "책 덮고 문제 풀기", "최소한의 효율 공부", "공무원 시험 보기", "대치동으로 이사",
           "유튜브 강의 몰아보기", "잘 나오는 챕터 집중", "친구한테 SOS", "포기하기", "자퇴하기", "미리미리 할 걸..", "다음 학기에 재수강하기"
         ];
         images = [
-          'test1.jpg', 'test2.avif', 'test3.png', 'test4.jpg', 'test5.jpg', 'test7.jpeg', 'test8.jpg', 'test9.png', 'test10.jpg', 'test11.JPG', 'test12.jpg', 'test13.jpg', 'test14.jpg', 'test15.png', 'test16.webp', 'test17.jpg', 'test18.webp', 'test19.jpg', 'test20.jpeg'
+          'test1.jpg', 'test2.avif', 'test3.png', 'test4.jpg', 'test5.jpg', 'test7.jpeg', 'test8.jpg', 'test9.png', 'test10.jpg', 'test11.JPG', 'test12.jpg', 'test13.jpg', 'test14.jpg', 'test15.png', 'test16.webp', 'test17.jpg', 'test18.webp', 'test19.jpg', 'test20.jpeg', 'test21.jpg', 'test22.jpg', 'test22.png', 'test23.jpg', 'test24.jpg', 'test25.png', 'test26.png'
         ];
       } else if (select.value === "kimchi") {
         texts = [
          "묵은지 쓰면 깊은맛", "앞다리살이 국물 잘 우러남", "김치는 볶고 끓여야", "참치액 몇 방울 추가", "돼지고기 핏물 제거 필수", "양파는 반개만 넣기", "대파는 두 번 넣기", "물 대신 쌀뜨물 쓰기", "고춧가루는 나중에", "된장 반 티스푼 비밀 재료", "멸치 육수면 감칠맛 업", "식용유 대신 들기름 가능", "다진 마늘 듬뿍 넣기", "두부는 끓이기 직전에", "후추는 아주 살짝만", "고기 먼저 볶아 풍미 더함", "청양고추는 마지막에", "전날보다 다음날이 맛남", "밥 말기 전에 숨 쉬기", "뚝배기 있으면 무조건 사용", "김치 국물 너무 많이 넣지 말기", "차돌박이 넣으면 김치국됨", "설탕 한 꼬집이 포인트", "김치 심지도 같이 넣기", "토마토 넣으면 이상해짐", "소주 한 숟갈 잡내 제거", "전자레인지에 고기 돌리기 금지", "핫도그 먹으면서 끓이기", "라면 스프는 비추", "남은 김치찌개에 라면 넣기 가능", "혼자 먹을 땐 소리 내지 않기", "뚜껑은 약불 땐 열어두기", "애플민트는 넣지 말기", "김치찌개엔 사이다 NO", "깻잎은 취향존중", "국자 안 쓰고 후회하지 말기", "타코야키랑 같이 먹지 말기", "깊은 그릇보다 넓은 냄비", "찬밥 말아야 진짜임", "시작 전에 배고프면 실패", "동치미랑 같이 먹으면 상극", "김치가 너무 맛없으면 포기", "김치찌개엔 감자 넣지 말기", "냄비 태우면 울지 말기", "레시피는 지켜야 레시피", "계량 안 하면 맛 운에 맡김", "다 끓인 후 5분 쉬게 하기", "TV 보면서 끓이면 넘침", "에어팟 낀 채로 만들지 말기", "끓는 동안 춤추지 않기", "불 앞에서 생각에 잠기지 말기", "찌개에 초코바 빠뜨리지 말기", "식탁에 먼저 숟가락 두기", "남기면 김치가 슬퍼함", "애정 넣으면 더 맛남", "엄마한테 물어보면 더 쉬움", "레시피 검색은 최소 3개 보기", "너무 자신감 있으면 태움", "요리하면서 울지 않기", "김치찌개에 정체성 혼동 금지", "먹을 사람 없으면 혼자 다 먹기", "밥보다 찌개 먼저 퍼오기", "맛없으면 라면 끓이기", "첫 숟가락은 혼잣말 금지", "된장찌개랑 비교하지 말기", "고기 많으면 짜짐 주의", "최고의 반찬은 김치찌개다"
         ];
         images = [
-          'kim1.webp', 'kim2.jpg', 'kim3.jpg', 'kim4.jpg', 'kim5.jpg', 'kim6.avif', 'kim7.jpg', 'kim8.jpg', 'kim9.jpg', 'kim10.jpg', 'kim11.webp', 'kim12.jpg', 'kim13.jpg', 'kim14.jpg', 'kim15.jpg', 'kim16.jpg', 'kim17.jpg', 'kim18.jpg', 'kim19.jpg', 'kim20.jpg', 'kim21.jpg'
+          'kim1.webp', 'kim2.jpg', 'kim3.jpg', 'kim4.jpg', 'kim5.jpg', 'kim6.avif', 'kim7.jpg', 'kim8.jpg', 'kim9.jpg', 'kim10.jpg', 'kim11.webp', 'kim12.jpg', 'kim13.jpg', 'kim14.jpg', 'kim15.jpg', 'kim16.jpg', 'kim17.jpg', 'kim18.jpg', 'kim19.jpg', 'kim20.jpg', 'kim21.jpg', 'kim22.jpg'
         ];
       }
         else if (select.value === "pen") {
@@ -662,7 +665,7 @@ function drawConnectionsAnimated() {
          "알코올로 톡톡 두드리기", "물파스로 살살 문지르기", "치약 바르고 칫솔질", "물티슈로 세게 문지르기", "에탄올 스며들게 하기", "식초랑 베이킹소다", "레몬즙으로 얼룩 제거", "젖은 솜으로 눌러보기", "과산화수소로 톡톡", "세탁 전 얼룩 제거제", "마요네즈는 절대 금지", "모기약 뿌리면 이상함", "드라이클리닝 맡기기", "섬유유연제는 무의미", "손톱으로 긁다 실패함", "헤어스프레이 뿌리기", "솜에 알코올 적시기", "식기세척기 돌리지 마", "지우개로 문질러 보기", "옷 뒤집고 문질러보기", "베이킹파우더 뿌려보기", "선크림은 효과 없어", "분무기로 물 뿌리기", "문지르기 전에 불려", "휴지로 닦다 번짐", "헤어젤은 글쎄요", "치약에 물 섞어 쓰기", "소금은 안 먹힘", "수건으로 톡톡 두드림", "드라이어로 말려보기", "가위로 잘라버리기", "흰옷엔 레몬즙 효과", "컬러옷은 신중하게", "문지르다 더 번짐", "수성펜인지 확인", "볼펜 잉크 성분 검색", "세제에 오래 담그기", "걍 새 옷 사기", "엄마한테 들키지 않기", "손빨래 추천", "뜨거운 물은 금물", "아세톤은 색 빠짐", "알콜솜 없으면 손소독제", "이쑤시개로 긁지 마", "세탁 전 스팟처리", "오래되면 안 빠짐", "강하게 비비면 망함", "인터넷 후기 참고", "지워졌는지 조심히 확인"
         ];
         images = [
-          'pen1.jpg', 'pen2.webp', 'pen3.jpg', 'pen4.jpeg', 'pen5.jpg', 'pen6.avif', 'pen6.jpg', 'pen7.jpg', 'pen8.jpg', 'pen9.jpg', 'pen10.jpg', 'pen11.jpg', 'pen12.jpeg', 'pen13.webp', 'pen14.png', 'pen15.jpg', 'pen16.png', 'pen17.jpg', 'pen18.jpg', 'pen19.jpg', 'pen20.jpg'
+          'pen1.jpg', 'pen2.webp', 'pen3.jpg', 'pen4.jpeg', 'pen5.jpg', 'pen6.avif', 'pen6.jpg', 'pen7.jpg', 'pen8.jpg', 'pen9.jpg', 'pen10.jpg', 'pen11.jpg', 'pen12.jpeg', 'pen13.webp', 'pen14.png', 'pen15.jpg', 'pen16.png', 'pen17.jpg', 'pen18.jpg', 'pen19.jpg', 'pen20.jpg', 'pen21.png'
          ];
         }
   
@@ -716,7 +719,7 @@ function drawConnectionsAnimated() {
       const pos = getRandomPosition();
       box.style.left = `${pos.x}px`;
       box.style.top = `${pos.y}px`;
-      box.style.position = 'absolute';
+      box.style.position = 'absolute'; 
 
       const fontSize = Math.floor(Math.random() * 48) + 8; // 12px ~ 28px
       box.style.fontSize = `${fontSize}px`;
